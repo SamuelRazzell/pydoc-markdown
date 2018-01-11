@@ -113,14 +113,7 @@ def copy_source_files(config):
   def process_pages(data):
     for key in data:
       filename = data[key]
-      if isinstance(filename, str) and '<<' in filename:
-        filename, source = filename.split('<<')
-        filename, source = filename.rstrip(), source.lstrip()
-        outfile = os.path.join(config['gens_dir'], filename)
-        makedirs(os.path.dirname(outfile))
-        shutil.copyfile(source, outfile)
-        data[key] = filename
-      elif isinstance(filename, dict):
+      if isinstance(filename, dict):
         process_pages(filename)
       elif isinstance(filename, list):
         [process_pages(x) for x in filename]

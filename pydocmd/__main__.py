@@ -29,6 +29,7 @@ import shutil
 import signal
 import sys
 import yaml
+import subprocess
 
 PYDOCMD_CONFIG = 'pydocmd.yml'
 parser = ArgumentParser()
@@ -126,6 +127,19 @@ def copy_source_files(config):
   for page in config['pages']:
     process_pages(page)
 
+def concat_files(config):
+  for page in config['pages']:
+    for key in page:
+      filename = page[key]
+      if isinstance(filename, str) and '<<' in filename:
+        filename, source = filename.split('<<')
+        filename, source = filename.rstrip(), source.lstrip()
+        if os.path.exists(filename) and os.path.exists(source):
+          subprocess.call(['cat', source, '>>', filename])
+      elif isinstance(filename, str) and '>>' in filename:
+        filename, source = filename.split('>>')
+        if os.path.exists(filename) and os.path.exists(source):
+          subprocess.call(['cat', filename, '>>', source])
 
 def new_project():
   with open('pydocmd.yml', 'w') as fp:
@@ -220,6 +234,9 @@ def main():
     with open(fname, 'w') as fp:
       for section in doc.sections:
         section.render(fp)
+
+  log('Concatinating files...')
+  concat_files(config)
 
   if args.command == 'generate':
     return 0

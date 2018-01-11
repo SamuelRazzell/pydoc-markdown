@@ -131,15 +131,17 @@ def concat_files(config):
   for page in config.get('concat', []):
     for key in page:
       filename = page[key]
-      if isinstance(filename, str) and '<<' in filename:
-        filename, source = filename.split('<<')
-        filename, source = filename.rstrip(), source.lstrip()
-        if os.path.exists(filename) and os.path.exists(source):
-          subprocess.call(['cat', source, '>>', filename])
-      elif isinstance(filename, str) and '>>' in filename:
-        filename, source = filename.split('>>')
-        if os.path.exists(filename) and os.path.exists(source):
-          subprocess.call(['cat', filename, '>>', source])
+      with open('/tmp/markdown', 'w') as temp:
+        if isinstance(filename, str) and '<<' in filename:
+          first, second = filename.split('<<')
+          first, second = first.rstrip(), second.lstrip()
+          if os.path.exists(first) and os.path.exists(second):
+            with open(second, 'r') as second_file:
+              with open(first, 'r') as first_file:
+                temp.write(second_file.read())
+                temp.write(first_file.read())
+            os.rename('/tmp/markdown', first)
+
 
 def new_project():
   with open('pydocmd.yml', 'w') as fp:

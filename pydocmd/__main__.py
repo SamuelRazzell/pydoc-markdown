@@ -128,7 +128,7 @@ def copy_source_files(config):
     process_pages(page)
 
 def concat_files(config):
-  for page in config['concat']:
+  for page in config.get('concat', []):
     for key in page:
       filename = page[key]
       if isinstance(filename, str) and '<<' in filename:
